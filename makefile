@@ -5,10 +5,10 @@ SOURCES = ./src/*.c
 all: build run clean
 
 build:
-	$(CC) $(SOURCES) $(CFLAGS) -o quest
+	$(CC) $(SOURCES) $(CFLAGS) -o abyss
 
 run:
-	./quest
+	./abyss
 
 clean:
-	rm quest
+	rm abyss
