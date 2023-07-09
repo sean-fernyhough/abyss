@@ -16,7 +16,7 @@ Abyss is written in C and as long as ncurses is installed, should compile on any
 Abyss uses WASD for movement and ui navigation. Generally E is used for select and Q is used to back out of menus and also to quit the game.
 
 ## PROGRESSION
-Abyss saves your progress everytime you move to a new floor, there is only one save slot so if a new character is created and progresses to a new floor, it will overwriite the current save.
+Abyss saves your progress everytime you move to a new floor, there is only one save slot so if a new character is created and progresses to a new floor, it will overwriite the current save. The save file is generated in the root directory and is call main.sav
 
 ## FEATURES
 Character Creation
