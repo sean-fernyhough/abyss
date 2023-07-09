@@ -125,7 +125,7 @@ void characterMenuSelect(CHARACTER_MENU option){
 
 void loadMenu(){
 	current_player = calloc(1, sizeof(Player));
-	FILE * file = fopen("saves/main.sav", "rb");
+	FILE * file = fopen("./main.sav", "rb");
 	if(file != NULL){
 		char buffer[sizeof(Player)];
 		fread(buffer, sizeof(Player), 1, file);
@@ -141,7 +141,7 @@ void loadMenu(){
 void saveGame(){
 	char buffer[sizeof(Player)];
 	memcpy(buffer, current_player, sizeof(Player));
-	FILE* file = fopen("saves/main.sav", "wb");
+	FILE* file = fopen("./main.sav", "wb");
 	if(file != NULL){
 		fwrite(buffer, sizeof(Player), 1, file);
 		fclose(file);
