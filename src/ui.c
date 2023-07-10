@@ -443,44 +443,99 @@ void drawInventory(){
 				}else if(index > 2){
 					mvaddch(32 + (index-3) , 1, '>');
 				}
+				Item * current_item = calloc(1, sizeof(Item));
+				current_item->name[0] = '\0';
+				switch(index){
+					case 0:
+						if(current_player->arrows.name[0] != '\0'){
+							current_item = &current_player->arrows;
+						}
+						break;
+					case 1:
+						if(current_player->right_hand.name[0] != '\0'){
+							current_item = &current_player->right_hand;
+						}
+						break;
+					case 2:
+						if(current_player->left_hand.name[0] != '\0'){
+							current_item = &current_player->left_hand;
+						}
+						break;
+					case 3:
+						if(current_player->head.name[0] != '\0'){
+							current_item = &current_player->head;
+						}
+						break;
+					case 4:
+						if(current_player->body.name[0] != '\0'){
+							current_item = &current_player->body;
+						}
+						break;
+					case 5:
+						if(current_player->hands.name[0] != '\0'){
+							current_item = &current_player->hands;
+						}
+						break;
+					case 6:
+						if(current_player->legs.name[0] != '\0'){
+							current_item = &current_player->legs;
+						}
+						break;
+					case 7:
+						if(current_player->feet.name[0] != '\0'){
+							current_item = &current_player->feet;
+						}
+						break;
+				}
+				move(43, 2);
+				if(current_item->name[0] != '\0'){
+					if(current_item->type == WEAPON && current_item->weapon.type != SHIELD){
+						printw("%s DMG: %d -- E) Unequip", current_item->description, getDamage(&current_item->weapon, current_player));
+					}else{
+						printw("%s DEF: %d -- E) Unequip", current_item->description, current_item->type == ARMOR?current_item->armor.protection:getDamage(&current_item->weapon, current_player));
+					}
+				}
 				break;
 			case 2:
 				mvaddch(5+(index*2), 42, '>');
 				move(43, 2);
-				if(current_player->inventory[index].type == WEAPON && current_player->inventory[index].weapon.type != SHIELD){
-					printw("%s DMG: %d -- E) Equip X) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player));
-				}else if(current_player->inventory[index].type == CONSUMABLE){
-					if(current_player->inventory[index].consumable.type == SCROLL){
-						if(current_player->inventory[index].consumable.scroll_spell.type == HEALING){
-				                                                      			printw("%s HEALTH: %d -- E) USE X) Drop", current_player->inventory[index].description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
-						}else if(current_player->inventory[index].consumable.scroll_spell.type == DAMAGE){
-							printw("%s DMG: %d -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
-						}else if(current_player->inventory[index].consumable.scroll_spell.type == PROTECT){
-							printw("%s PROT: %d -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
-
+				if(current_player->inventory[index].name[0] != '\0'){
+					if(current_player->inventory[index].type == WEAPON && current_player->inventory[index].weapon.type != SHIELD){
+						printw("%s DMG: %d -- E) Equip X) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player));
+					}else if(current_player->inventory[index].type == CONSUMABLE){
+						if(current_player->inventory[index].consumable.type == SCROLL){
+							if(current_player->inventory[index].consumable.scroll_spell.type == HEALING){
+								printw("%s HEALTH: %d -- E) USE X) Drop", current_player->inventory[index].description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
+							}else if(current_player->inventory[index].consumable.scroll_spell.type == DAMAGE){
+								printw("%s DMG: %d -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
+							}else if(current_player->inventory[index].consumable.scroll_spell.type == PROTECT){
+								printw("%s PROT: %d -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description, getSpellDamage(&current_player->inventory[index].consumable.scroll_spell, current_player));
+							}else{
+								printw("%s -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description);
+							}
+						}else if(current_player->inventory[index].consumable.type == BOOK_OF_KNOWLEDGE){
+							printw("%s -- %s", current_player->inventory[index].description, is_battling?"X) Drop":"E) Use X) Drop");
 						}else{
-							printw("%s -- X) Drop", current_player->inventory[index].consumable.scroll_spell.description);
+							printw("%s -- E) USE X) Drop", current_player->inventory[index].description);
 						}
-					}else if(current_player->inventory[index].consumable.type == BOOK_OF_KNOWLEDGE){
-						printw("%s -- %s", current_player->inventory[index].description, is_battling?"X) Drop":"E) Use X) Drop");
 					}else{
-						printw("%s -- E) USE X) Drop", current_player->inventory[index].description);
+						printw("%s DEF: %d -- E) Equip X) Drop", current_player->inventory[index].description, current_player->inventory[index].type == ARMOR?current_player->inventory[index].armor.protection:getDamage(&current_player->inventory[index].weapon, current_player));
 					}
-				}else{
-					printw("%s DEF: %d -- E) Equip X) Drop", current_player->inventory[index].description, current_player->inventory[index].type == ARMOR?current_player->inventory[index].armor.protection:getDamage(&current_player->inventory[index].weapon, current_player));
 				}
 				break;
 			case 3:
 				mvaddch(5+(index*2), 82, '>');
 				move(43, 2);
-				if(current_player->spellbook[index].is_offensive && current_player->spellbook[index].element != NONE){
-					printw("%s DMG: %d COST: %d -- X) Forget Spell", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost);
-				}else if(current_player->spellbook[index].is_offensive){
-					printw("%s COST: %d -- X) Forget Spell", current_player->spellbook[index].description, current_player->spellbook[index].mana_cost);
-				}else if(current_player->spellbook[index].type == HEALING){
-					printw("%s HEALTH: %d COST: %d -- %s", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost, is_battling?"X) Forget Spell":"E) Cast X) Forget Spell");
-				}else if(current_player->spellbook[index].type == PROTECT){
-					printw("%s PROT: %d COST: %d -- X) Forget Spell", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost);
+				if(current_player->spellbook[index].name[0] != '\0'){
+					if(current_player->spellbook[index].is_offensive && current_player->spellbook[index].element != NONE){
+						printw("%s DMG: %d COST: %d -- X) Forget Spell", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost);
+					}else if(current_player->spellbook[index].is_offensive){
+						printw("%s COST: %d -- X) Forget Spell", current_player->spellbook[index].description, current_player->spellbook[index].mana_cost);
+					}else if(current_player->spellbook[index].type == HEALING){
+						printw("%s HEALTH: %d COST: %d -- %s", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost, is_battling?"X) Forget Spell":"E) Cast X) Forget Spell");
+					}else if(current_player->spellbook[index].type == PROTECT){
+						printw("%s PROT: %d COST: %d -- X) Forget Spell", current_player->spellbook[index].description, getSpellDamage(&current_player->spellbook[index], current_player), current_player->spellbook[index].mana_cost);
+					}
 				}
 				break;
 		}

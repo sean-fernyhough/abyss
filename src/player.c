@@ -20,9 +20,9 @@ Player *createPlayer(char name[], Stats *stats){
 
 	Item blank_item;
 
-	strcpy(blank_item.name, "\0");
-	strcpy(blank_item.armor.name, "\0");
-	strcpy(blank_item.weapon.name, "\0");
+	blank_item.name[0] = '\0';
+	blank_item.armor.name[0] = '\0';
+	blank_item.weapon.name[0] = '\0';
 	blank_item.weapon.damage = 0;
 	blank_item.armor.protection = 0;
 	blank_item.weapon.count = 0;
