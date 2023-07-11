@@ -41,10 +41,16 @@ typedef enum {
 
 typedef enum {
 	DAGGER,
-	SWORD,
+	BROAD_SWORD,
+	LONG_SWORD,
+	SCIMITAR,
 	KATANA,
 	WAR_AXE,
+	BATTLE_AXE,
 	WAR_HAMMER,
+	SPEAR,
+	HALBERD,
+	SCYTHE,
 	BOW,
 	THROWING_KNIVES,
 	SHIELD,
@@ -102,6 +108,7 @@ typedef struct {
 	char description[255];
 	int count;
 	bool is_equipped;
+	bool is_two_handed;
 	WEAPON_TYPE type;
 	MATERIAL material;
 	ELEMENT element;
@@ -196,8 +203,8 @@ typedef struct {
 	Item legs;
 	Item feet;
 	Stats stats;
-	Item left_hand;
-	Item right_hand;
+	Item off_hand;
+	Item main_hand;
 	Item arrows;
 	int skill_points;
 	int status_timer;

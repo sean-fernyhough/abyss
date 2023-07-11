@@ -245,17 +245,18 @@ void battleMenuSelect(){
 }
 
 void attack(){
-	int player_damage = 0;
-	if((player->right_hand.weapon.name[0] == '\0' || player->right_hand.weapon.type == SHIELD) && (player->left_hand.weapon.name[0] == '\0' || player->left_hand.weapon.type == SHIELD)){
-		player_damage = 1 + (player->stats.strength>0?roundf(player->stats.strength/2):0);
+	int player_damage_main = 0;
+	int player_damage_off_hand = 0;
+	if((player->main_hand.weapon.name[0] == '\0' || player->main_hand.weapon.type == SHIELD) && (player->off_hand.weapon.name[0] == '\0' || player->off_hand.weapon.type == SHIELD)){
+		player_damage_main = 1 + (player->stats.strength>0?roundf(player->stats.strength/2):0);
 	}else{
-		if(player->right_hand.weapon.type == BOW){
+		if(player->main_hand.weapon.type == BOW){
 			if(player->arrows.name[0] == '\0'){
 				battleMessage("You need arrows");
 				return;
 			}
-			player_damage += getDamage(&player->right_hand.weapon, player);
-			player_damage += getDamage(&player->arrows.weapon, player);
+			player_damage_main += getDamage(&player->main_hand.weapon, player);
+			player_damage_main += getDamage(&player->arrows.weapon, player);
 			player->arrows.weapon.count--;
 			if(player->arrows.weapon.count == 0){
 				battleMessage("That was your last arrow!");
@@ -266,45 +267,77 @@ void attack(){
 				blank_item.weapon.count = 0;
 				player->arrows = blank_item;
 			}
-		}else if(player->right_hand.weapon.type == THROWING_KNIVES){
-			player_damage += getDamage(&player->right_hand.weapon, player);
-			player->right_hand.weapon.count--;
-			if(player->right_hand.weapon.count == 0){
-				battleMessage("That was your last knife!");
-				Item blank_item;
-				blank_item.name[0] = '\0';
-				blank_item.weapon.name[0] = '\0';
-				blank_item.type = WEAPON;
-				blank_item.weapon.count = 0;
-				player->right_hand = blank_item;
+		}else{
+		if(player->main_hand.weapon.name[0] != '\0'){
+			player_damage_main += getDamage(&player->main_hand.weapon, player);
+			if(player->main_hand.weapon.type == THROWING_KNIVES){
+				player->main_hand.weapon.count--;
+				if(player->main_hand.weapon.count == 0){
+					battleMessage("That was your last knife!");
+					Item blank_item;
+					blank_item.name[0] = '\0';
+					blank_item.weapon.name[0] = '\0';
+					blank_item.type = WEAPON;
+					blank_item.weapon.count = 0;
+					player->main_hand = blank_item;
+				}
 			}
-	}else{
-		if(player->right_hand.weapon.type != SHIELD){
-			player_damage += getDamage(&player->right_hand.weapon, player);
 		}
-		if(player->left_hand.weapon.type != SHIELD && player->left_hand.weapon.name[0] != '\0'){
-			player_damage += getDamage(&player->left_hand.weapon, player);
+		if(player->off_hand.weapon.type != SHIELD && player->off_hand.weapon.name[0] != '\0'){
+			player_damage_off_hand += getDamage(&player->off_hand.weapon, player);
+			if(player->off_hand.weapon.type == THROWING_KNIVES){
+				player->off_hand.weapon.count--;
+				if(player->off_hand.weapon.count == 0){
+					battleMessage("That was your last knife!");
+					Item blank_item;
+					blank_item.name[0] = '\0';
+					blank_item.weapon.name[0] = '\0';
+					blank_item.type = WEAPON;
+					blank_item.weapon.count = 0;
+					player->off_hand = blank_item;
+				}
+			}
 		}
-	}
+		}
 	}
 	timer_should_progress = true;
-	monster->health -= player_damage;
 	char attackMessage[100];
-	if(monster->weakness == player->right_hand.weapon.element && player->right_hand.weapon.element != NONE){
-		player_damage = roundf((float) player_damage * 1.5);
-		sprintf(attackMessage, "%s is weak to %s!", monster->name, player->right_hand.weapon.name);
+	if(monster->weakness == player->main_hand.weapon.element && player->main_hand.weapon.element != NONE){
+		player_damage_main = roundf((float) player_damage_main * 1.5);
+		sprintf(attackMessage, "%s is weak to %s!", monster->name, player->main_hand.weapon.name);
 		battleMessage(attackMessage);
 	}
-	if(monster->resistance == player->right_hand.weapon.element && player->right_hand.weapon.element != NONE){
-		player_damage = roundf((float) player_damage/2);
-		sprintf(attackMessage, "%s is resistant to %s!", monster->name, player->right_hand.weapon.name);
+	if(monster->resistance == player->main_hand.weapon.element && player->main_hand.weapon.element != NONE){
+		player_damage_main = roundf((float) player_damage_main/2);
+		sprintf(attackMessage, "%s is resistant to %s!", monster->name, player->main_hand.weapon.name);
 		battleMessage(attackMessage);
 	}
-	sprintf(attackMessage, "Attacked for %d damage!", player_damage);
+	if(monster->weakness == player->off_hand.weapon.element && player->off_hand.weapon.element != NONE){
+		player_damage_off_hand = roundf((float) player_damage_off_hand * 1.5);
+		sprintf(attackMessage, "%s is weak to %s!", monster->name, player->off_hand.weapon.name);
+		battleMessage(attackMessage);
+	}
+	if(monster->resistance == player->off_hand.weapon.element && player->off_hand.weapon.element != NONE){
+		player_damage_off_hand = roundf((float) player_damage_off_hand/2);
+		sprintf(attackMessage, "%s is resistant to %s!", monster->name, player->off_hand.weapon.name);
+		battleMessage(attackMessage);
+	}
+	sprintf(attackMessage, "Attacked for %d damage!", player_damage_main + player_damage_off_hand);
+	monster->health -= (player_damage_main + player_damage_off_hand);
 	battleMessage(attackMessage);
-	if(player->right_hand.weapon.element == DRAIN){
+	if(player->main_hand.weapon.element == DRAIN){
 		int health1 = player->health;
-		player->health += getDamage(&player->right_hand.weapon, player);
+		player->health += getDamage(&player->main_hand.weapon, player);
+		if(player->health > player->max_health){
+			player->health = player->max_health;
+		}
+		int health2 = player->health;
+		sprintf(attackMessage, "You restored %d health!", health2 - health1);
+		battleMessage(attackMessage);
+	}
+	if(player->off_hand.weapon.element == DRAIN){
+		int health1 = player->health;
+		player->health += getDamage(&player->off_hand.weapon, player);
 		if(player->health > player->max_health){
 			player->health = player->max_health;
 		}
@@ -338,7 +371,7 @@ void attack(){
 		is_battling = false;
 	}else{
 			if((rand()%100) < 20){
-				switch(player->right_hand.weapon.element){
+				switch(player->main_hand.weapon.element){
 					case FIRE:
 						monster->status = BURNING;
 						monster->status_timer = 3;
@@ -701,8 +734,8 @@ void monsterAttack(){
 			prot_value = 0;
 		}else{
 			prot_value = is_defending?protectionFactor:rand() % protectionFactor;
-			if(player->left_hand.weapon.type == SHIELD){
-				prot_value += player->left_hand.weapon.damage;
+			if(player->off_hand.weapon.type == SHIELD){
+				prot_value += player->off_hand.weapon.damage;
 			}
 		}
 		prot_value += player->stats.endurence > 0?rand()%((int) (player->stats.endurence/2)):0;
@@ -731,7 +764,6 @@ void monsterAttack(){
 					battleMessage("You are bleeding!");
 					player->status = BLEEDING;
 					player->status_timer = 3;
-					printw("[BLEEDING]");
 					break;
 				case BURNING:
 					battleMessage("You are burning!");
