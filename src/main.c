@@ -8,8 +8,8 @@ int main(void){
 
 	if(has_colors()){
 		start_color();
-		init_pair(VISIBLE_COLOR, COLOR_WHITE, COLOR_BLACK);
-		init_pair(SEEN_COLOR, COLOR_BLUE, COLOR_BLACK);
+		init_pair(VISIBLE_COLOR, 7, COLOR_BLACK);
+		init_pair(SEEN_COLOR, 8, COLOR_BLACK);
 	}
 
 
