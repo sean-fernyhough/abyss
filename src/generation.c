@@ -436,53 +436,98 @@ Item * generateWeapon(){
 			char description[255];
 			float base_damage;
 			float mat_multi;
-			switch(rand()%9){
+			switch(rand()%15){
 				case 0:
 					strcpy(weapon_type, "Dagger");
 					new_item->weapon.type = DAGGER;
+					new_item->weapon.is_two_handed = false;
 					base_damage = 1.2;
 					break;
 				case 1:
-					strcpy(weapon_type, "Sword");
-					new_item->weapon.type = SWORD;
-					base_damage = 1.8;
+					strcpy(weapon_type, "Broad Sword");
+					new_item->weapon.type = BROAD_SWORD;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 1.7;
 					break;
 				case 2:
-					strcpy(weapon_type, "Katana");
-					new_item->weapon.type = KATANA;
-					base_damage = 2.0;
+					strcpy(weapon_type, "Long Sword");
+					new_item->weapon.type = LONG_SWORD;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 1.5;
 					break;
 				case 3:
-					strcpy(weapon_type, "War Axe");
-					new_item->weapon.type = WAR_AXE;
-					base_damage = 3.0;
+					strcpy(weapon_type, "Scimitar");
+					new_item->weapon.type = SCIMITAR;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 1.6;
 					break;
 				case 4:
-					strcpy(weapon_type, "War Hammer");
-					new_item->weapon.type = WAR_HAMMER;
-					base_damage = 3.2;
-					break;
-				case 5:
-					strcpy(weapon_type, "Bow");
-					new_item->weapon.type = BOW;
+					strcpy(weapon_type, "Katana");
+					new_item->weapon.type = KATANA;
+					new_item->weapon.is_two_handed = false;
 					base_damage = 2.0;
 					break;
+				case 5:
+					strcpy(weapon_type, "War Axe");
+					new_item->weapon.type = WAR_AXE;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 2.4;
+					break;
 				case 6:
-					strcpy(weapon_type, "Throwing Knives");
-					new_item->weapon.type = THROWING_KNIVES;
-					base_damage = 2.8;
-					new_item->weapon.count = 10;
+					strcpy(weapon_type, "Battle Axe");
+					new_item->weapon.type = BATTLE_AXE;
+					new_item->weapon.is_two_handed = true;
+					base_damage = 3.2;
 					break;
 				case 7:
-					strcpy(weapon_type, "Shield");
-					new_item->weapon.type = SHIELD;
-					base_damage = 2;
+					strcpy(weapon_type, "War Hammer");
+					new_item->weapon.type = WAR_HAMMER;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 2.6;
 					break;
 				case 8:
+					strcpy(weapon_type, "Spear");
+					new_item->weapon.type = SPEAR;
+					new_item->weapon.is_two_handed = true;
+					base_damage = 2.3;
+					break;
+				case 9:
+					strcpy(weapon_type, "Halberd");
+					new_item->weapon.type = HALBERD;
+					new_item->weapon.is_two_handed = true;
+					base_damage = 3.0;
+					break;
+				case 10:
+					strcpy(weapon_type, "Scythe");
+					new_item->weapon.type = SCYTHE;
+					new_item->weapon.is_two_handed = true;
+					base_damage = 2.7;
+					break;
+				case 11:
+					strcpy(weapon_type, "Bow");
+					new_item->weapon.type = BOW;
+					new_item->weapon.is_two_handed = true;
+					base_damage = 2.2;
+					break;
+				case 12:
+					strcpy(weapon_type, "Throwing Knives");
+					new_item->weapon.type = THROWING_KNIVES;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 2.8;
+					new_item->weapon.count = (rand()%20)+10;
+					break;
+				case 13:
+					strcpy(weapon_type, "Shield");
+					new_item->weapon.type = SHIELD;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 2;
+					break;
+				case 14:
 					strcpy(weapon_type, "Arrows");
 					new_item->weapon.type = ARROWS;
-					base_damage = 1.2;
-					new_item->weapon.count = 20;
+					new_item->weapon.is_two_handed = false;
+					base_damage = 0.5;
+					new_item->weapon.count = (rand()%60)+40;
 					break;
 			}
 			int weapon_material_chance = roundf((rand()%(70-current_player->floor < 1?1:70-current_player->floor))+current_player->floor);

@@ -18,6 +18,7 @@ void removeSkillPoint(int skill);
 void nameFocus();
 void initializeCharacterMenu();
 void characterConfirmation();
+void equipOffHand(int index);
 void inventorySelect(int sub_section, int index);
 extern Player *current_player;
 extern bool action_taken;

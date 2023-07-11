@@ -28,8 +28,8 @@ Player *createPlayer(char name[], Stats *stats){
 	blank_item.weapon.count = 0;
 
 
-	player->right_hand = blank_item;
-	player->left_hand = blank_item;
+	player->main_hand = blank_item;
+	player->off_hand = blank_item;
 	player->arrows = blank_item;
 	player->head = blank_item;
 	player->body = blank_item;
@@ -44,7 +44,7 @@ Player *createPlayer(char name[], Stats *stats){
 
 int getDamage(Weapon * weapon, Player * player){
 	int damage;
-	if(weapon->type == DAGGER || weapon->type == KATANA || weapon->type == BOW || weapon->type == THROWING_KNIVES || weapon->type == ARROWS){
+	if(weapon->type == DAGGER || weapon->type == KATANA || weapon->type == BOW || weapon->type == THROWING_KNIVES || weapon->type == ARROWS || weapon->type == SCIMITAR || weapon->type == SPEAR || weapon->type == SCYTHE){
 			damage = weapon->damage + roundf((weapon->damage/4) * ((player->stats.dexterity)));
 
 //	}else if(weapon->type == SWORD){

@@ -285,7 +285,7 @@ void drawInventory(){
 		protectionFactor += current_player->hands.name[0] != '\0'?current_player->hands.armor.protection:0;
 		protectionFactor += current_player->legs.name[0] != '\0'?current_player->legs.armor.protection:0;
 		protectionFactor += current_player->feet.name[0] != '\0'?current_player->feet.armor.protection:0;
-		protectionFactor += current_player->left_hand.weapon.type == SHIELD?current_player->left_hand.weapon.damage:0;
+		protectionFactor += current_player->off_hand.weapon.type == SHIELD?current_player->off_hand.weapon.damage:0;
 		protectionFactor += (int) (current_player->stats.endurence/2);
 		num_of_spells = 0;
 		num_of_items = 0;
@@ -351,16 +351,16 @@ void drawInventory(){
 
 
 		int player_damage = 0;
-		if((current_player->right_hand.weapon.name[0] == '\0' || current_player->right_hand.weapon.type == SHIELD) && (current_player->left_hand.weapon.name[0] == '\0' || current_player->left_hand.weapon.type == SHIELD)){
+		if((current_player->main_hand.weapon.name[0] == '\0' || current_player->main_hand.weapon.type == SHIELD) && (current_player->off_hand.weapon.name[0] == '\0' || current_player->off_hand.weapon.type == SHIELD)){
 			player_damage = 1 + (current_player->stats.strength>0?roundf(current_player->stats.strength/2):0);
 		}else{
-			if(current_player->right_hand.weapon.type != SHIELD){
-				player_damage += getDamage(&current_player->right_hand.weapon, current_player);
+			if(current_player->main_hand.weapon.type != SHIELD && current_player->main_hand.weapon.name[0] != '\0'){
+				player_damage += getDamage(&current_player->main_hand.weapon, current_player);
 			}
-			if(current_player->left_hand.weapon.type != SHIELD && current_player->left_hand.weapon.name[0] != '\0'){
-				player_damage += getDamage(&current_player->left_hand.weapon, current_player);
+			if(current_player->off_hand.weapon.type != SHIELD && current_player->off_hand.weapon.name[0] != '\0'){
+				player_damage += getDamage(&current_player->off_hand.weapon, current_player);
 			}
-			if(current_player->arrows.weapon.name[0] != '\0' && current_player->right_hand.type == BOW){
+			if(current_player->arrows.weapon.name[0] != '\0' && current_player->main_hand.type == BOW){
 				player_damage += getDamage(&current_player->arrows.weapon, current_player);
 			}
 		}
@@ -374,12 +374,12 @@ void drawInventory(){
 		printw("Arrows: %s%s", current_player->arrows.name, current_player->arrows.weapon.count > 0?arrowMessage:"");
 		move(28, 2);
 		char weaponRightCount[100];
-		sprintf(weaponRightCount, " (%d)", current_player->right_hand.weapon.count);
-		printw("Weapon: %s%s", current_player->right_hand.name, current_player->right_hand.weapon.count > 0?weaponRightCount:"");
+		sprintf(weaponRightCount, " (%d)", current_player->main_hand.weapon.count);
+		printw("Main Hand: %s%s", current_player->main_hand.name, current_player->main_hand.weapon.count > 0?weaponRightCount:"");
 		move(29, 2);
 		char weaponLeftCount[100];
-		sprintf(weaponLeftCount, " (%d)", current_player->left_hand.weapon.count);
-		printw("Shield: %s%s", current_player->left_hand.name, current_player->left_hand.weapon.count > 0?weaponRightCount:"");
+		sprintf(weaponLeftCount, " (%d)", current_player->off_hand.weapon.count);
+		printw("Off Hand: %s%s", current_player->off_hand.name, current_player->off_hand.weapon.count > 0?weaponLeftCount:"");
 		move(32, 2);
 		printw("Head: %s", current_player->head.name);
 		move(33, 2);
@@ -452,13 +452,13 @@ void drawInventory(){
 						}
 						break;
 					case 1:
-						if(current_player->right_hand.name[0] != '\0'){
-							current_item = &current_player->right_hand;
+						if(current_player->main_hand.name[0] != '\0'){
+							current_item = &current_player->main_hand;
 						}
 						break;
 					case 2:
-						if(current_player->left_hand.name[0] != '\0'){
-							current_item = &current_player->left_hand;
+						if(current_player->off_hand.name[0] != '\0'){
+							current_item = &current_player->off_hand;
 						}
 						break;
 					case 3:
@@ -501,7 +501,7 @@ void drawInventory(){
 				move(43, 2);
 				if(current_player->inventory[index].name[0] != '\0'){
 					if(current_player->inventory[index].type == WEAPON && current_player->inventory[index].weapon.type != SHIELD){
-						printw("%s DMG: %d -- E) Equip X) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player));
+						printw("%s DMG: %d -- E) Equip Main Hand %sX) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player), current_player->inventory[index].weapon.is_two_handed?"":"R) Equip Off Hand ");
 					}else if(current_player->inventory[index].type == CONSUMABLE){
 						if(current_player->inventory[index].consumable.type == SCROLL){
 							if(current_player->inventory[index].consumable.scroll_spell.type == HEALING){
@@ -588,6 +588,13 @@ void drawInventory(){
 			case 'e':
 				inventorySelect(sub_section, index);
 				break;
+			case 'r':
+				if(sub_section == 2 && current_player->inventory[index].type == WEAPON){
+					if(current_player->inventory[index].weapon.type != SHIELD && !(current_player->inventory[index].weapon.is_two_handed)){
+						equipOffHand(index);
+					}
+				}
+				break;
 			case 'a':
 				if(sub_section == 2){
 					index = 0;
@@ -632,7 +639,62 @@ void drawInventory(){
 	}
 }
 
+void equipOffHand(int index){
+		bool item_swapped = false;
+		bool item_2_swapped = false;
+		Item temp_item;
+		Item temp_item_2;
+		Item blank_item;
+		strcpy(blank_item.name, "\0");
+		strcpy(blank_item.armor.name, "\0");
+		strcpy(blank_item.weapon.name, "\0");
+		blank_item.weapon.damage = 0;
+		blank_item.armor.protection = 0;
+		blank_item.weapon.count = 0;
+		if(current_player->main_hand.name[0] != '\0' && current_player->main_hand.weapon.is_two_handed){
+			if(current_player->main_hand.name[0] != '\0'){
+				temp_item = current_player->main_hand;
+				item_swapped = true;
+			}
+			current_player->main_hand = current_player->inventory[index];
+			if(current_player->off_hand.name[0] != '\0'){
+				temp_item_2 = current_player->off_hand;
+				item_2_swapped = true;
+			}
+		}else{
+			if(current_player->off_hand.name[0] != '\0'){
+				temp_item = current_player->off_hand;
+				item_swapped = true;
+			}
+			current_player->off_hand = current_player->inventory[index];
+		}
+				//current_player->main_hand.weapon.is_equipped = true;
+		if(!item_swapped && !item_2_swapped){
+			for(int i = index; i < num_of_items; i++){
+				if(i == 17){
+					current_player->inventory[i].name[0] = '\0';
+				}else{
+					current_player->inventory[i] = current_player->inventory[i+1];
+				}
+			}
+		}else{
+			if(item_swapped){
+				current_player->inventory[index] = temp_item;
+			}
+			if(item_2_swapped){
+				current_player->inventory[index+1] = temp_item_2;
+			}
+		}
+}
+
 void inventorySelect(int sub_section, int index){
+	Item blank_item;
+	strcpy(blank_item.name, "\0");
+	strcpy(blank_item.armor.name, "\0");
+	strcpy(blank_item.weapon.name, "\0");
+	blank_item.weapon.damage = 0;
+	blank_item.armor.protection = 0;
+	blank_item.weapon.count = 0;
 	switch(sub_section){
 		case 0:
 			if(current_player->skill_points > 0){
@@ -668,13 +730,6 @@ void inventorySelect(int sub_section, int index){
 			}
 			break;
 		case 1:
-			Item blank_item;
-			strcpy(blank_item.name, "\0");
-			strcpy(blank_item.armor.name, "\0");
-			strcpy(blank_item.weapon.name, "\0");
-			blank_item.weapon.damage = 0;
-			blank_item.armor.protection = 0;
-			blank_item.weapon.count = 0;
 			switch(index){
 				case 0:
 					if(current_player->arrows.name[0] != '\0'){
@@ -684,17 +739,17 @@ void inventorySelect(int sub_section, int index){
 					}
 					break;
 				case 1:
-					if(current_player->right_hand.name[0] != '\0'){
+					if(current_player->main_hand.name[0] != '\0'){
 						num_of_items++;
-						current_player->inventory[num_of_items-1] = current_player->right_hand;
-						current_player->right_hand = blank_item;
+						current_player->inventory[num_of_items-1] = current_player->main_hand;
+						current_player->main_hand = blank_item;
 					}
 					break;
 				case 2:
-					if(current_player->left_hand.name[0] != '\0'){
+					if(current_player->off_hand.name[0] != '\0'){
 						num_of_items++;
-						current_player->inventory[num_of_items-1] = current_player->left_hand;
-						current_player->left_hand = blank_item;
+						current_player->inventory[num_of_items-1] = current_player->off_hand;
+						current_player->off_hand = blank_item;
 					}
 					break;
 				case 3:
@@ -736,7 +791,9 @@ void inventorySelect(int sub_section, int index){
 			break;
 		case 2:
 			bool item_swapped = false;
+			bool item_2_swapped = false;
 			Item temp_item;
+			Item temp_item_2;
 			if(current_player->inventory[index].type == WEAPON){
 				if(current_player->inventory[index].weapon.type == ARROWS){
 					if(current_player->arrows.name[0] != '\0'){
@@ -745,34 +802,54 @@ void inventorySelect(int sub_section, int index){
 					}
 					current_player->arrows.weapon.is_equipped = false;
 					current_player->arrows = current_player->inventory[index];
-					//current_player->arrows.weapon.is_equipped = true;
 				}else if(current_player->inventory[index].weapon.type == SHIELD){
-					if(current_player->left_hand.name[0] != '\0'){
-						temp_item = current_player->left_hand;
+					if(current_player->off_hand.name[0] != '\0'){
+						temp_item = current_player->off_hand;
 						item_swapped = true;
 					}
-					current_player->left_hand.weapon.is_equipped = false;
-					current_player->left_hand = current_player->inventory[index];
-					//current_player->left_hand.weapon.is_equipped = true;
+					current_player->off_hand.weapon.is_equipped = false;
+					current_player->off_hand = current_player->inventory[index];
 				}else{
-					if(current_player->right_hand.name[0] != '\0'){
-						temp_item = current_player->right_hand;
-						item_swapped = true;
-					}
-					current_player->right_hand.weapon.is_equipped = false;
-					current_player->right_hand = current_player->inventory[index];
-					//current_player->right_hand.weapon.is_equipped = true;
-				}
-				if(!item_swapped){
-					for(int i = index; i < num_of_items; i++){
-						if(i == 17){
-							current_player->inventory[i].name[0] = '\0';
+					if(current_player->inventory[index].weapon.is_two_handed){
+						if(num_of_items > 15){
+							move(43, 2);
+							printw("There is not enough room in your inventory!");
 						}else{
-							current_player->inventory[i] = current_player->inventory[i+1];
+							if(current_player->main_hand.name[0] != '\0'){
+								temp_item = current_player->main_hand;
+								item_swapped = true;
+							}
+							current_player->main_hand = current_player->inventory[index];
+							if(current_player->off_hand.name[0] != '\0'){
+								temp_item_2 = current_player->off_hand;
+								item_2_swapped = true;
+								current_player->off_hand = blank_item;
+							}
+						}
+					}else{
+						if(current_player->main_hand.name[0] != '\0'){
+							temp_item = current_player->main_hand;
+							item_swapped = true;
+						}
+						current_player->main_hand = current_player->inventory[index];
+					}
+						//current_player->main_hand.weapon.is_equipped = true;
+					if(!item_swapped && !item_2_swapped){
+						for(int i = index; i < num_of_items; i++){
+							if(i == 17){
+								current_player->inventory[i].name[0] = '\0';
+							}else{
+								current_player->inventory[i] = current_player->inventory[i+1];
+							}
+						}
+					}else{
+						if(item_swapped){
+							current_player->inventory[index] = temp_item;
+						}
+						if(item_2_swapped){
+							current_player->inventory[index+1] = temp_item_2;
 						}
 					}
-				}else{
-					current_player->inventory[index] = temp_item;
 				}
 			}else if(current_player->inventory[index].type == ARMOR){
 				switch(current_player->inventory[index].armor.type){
