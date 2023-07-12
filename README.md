@@ -1,7 +1,7 @@
 # ABYSS
 A terminal based roguelite game written in C and rendered using the ncurses library
 
-<img src="https://i.imgur.com/pGVTeMY.png"  width="600" height="420"> 
+<img src="https://i.imgur.com/3vt5cBl.png"  width="600" height="420"> 
 
 ## ABOUT
 Abyss is a roguelite dungeon crawler that has been modernised with rpg elements and a flexible turn based combat system using ASCII art
@@ -19,18 +19,17 @@ Abyss uses WASD for movement and ui navigation. Generally E is used for select a
 Abyss saves your progress everytime you move to a new floor, there is only one save slot so if a new character is created and progresses to a new floor, it will overwriite the current save. The save file is generated in the root directory and is call main.sav
 
 ## FEATURES
-Character Creation
 - Create your character, choose a name and optionally assign skill points
-<img src="https://i.imgur.com/hMKUYT9.png" width="600" height="420">
+<img src="https://i.imgur.com/advL3IH.png" width="600" height="420">
 
 - A fleshed out inventory and equipment system
-<img src="https://i.imgur.com/KxnpOI8.png" width="600" height="420">
+<img src="https://i.imgur.com/PzKxEE8.png" width="600" height="420">
 
 - Sprawling randomised dungeons full of monsters and enemies
-<img src="https://i.imgur.com/JxQzmwo.png" width="600" height="420">
+<img src="https://i.imgur.com/L4218W7.png" width="600" height="420">
 
 - Tense combat that includes dynamic elements such as status effects, chances to miss, and a variety of spells, weapons, and items
-<img src="https://i.imgur.com/ZyWclGA.png" width="600" height="420">
+<img src="https://i.imgur.com/kYC34GT.png" width="600" height="420">
 
 ## LEGEND
 
@@ -42,6 +41,7 @@ Character Creation
 - `r` Rogue
 - `l` Lamia
 - `D` Dragon
+- `*` Boss
 
 ### Others
 - `v` Floor transition
