@@ -33,7 +33,7 @@ void addRoom(Room room){
 	for(int y = room.pos.y; y < room.pos.y + room.height; y++){
 		for(int x = room.pos.x; x < room.pos.x + room.width; x++){
 			if((rand () % 100) == 0 && items > 0){
-				items --;
+				items--;
 				map[y][x].ch = 'i';
 				map[y][x].has_item = true;
 				map[y][x].has_monster = false;
@@ -161,6 +161,112 @@ Position setupRooms(){
 	map[rooms[n_rooms-1].center.y][rooms[n_rooms-1].center.x].ch = 'v';
 	map[rooms[n_rooms-1].center.y][rooms[n_rooms-1].center.x].walkable = true;
 	return rooms[0].center;
+}
+
+Monster selectBoss(){
+	Monster * new_monster = calloc(1, sizeof(Monster));
+	int boss = rand()%3;
+	if(boss == 0){
+			strcpy(new_monster->name, "ancient dragon");
+			new_monster->num_of_attacks = 2;
+			Attack attack1;
+			strcpy(attack1.name, "Fire Breath");
+			attack1.damage = 50;
+			attack1.mana_cost = 0;
+			attack1.attack_element = FIRE;
+			attack1.accuracy = 70;
+			attack1.status = BURNING;
+			attack1.status_chance = 100;
+			Attack attack2;
+			strcpy(attack2.name, "Slash");
+			attack2.damage = 25;
+			attack2.mana_cost = 0;
+			attack2.attack_element = NONE;
+			attack2.accuracy = 90;
+			attack2.status = BLEEDING;
+			attack2.status_chance = 30;
+			new_monster->attacks[0] = attack1;
+			new_monster->attacks[1] = attack2;
+			new_monster->ch = '*';
+			new_monster->max_health = 1000;
+			new_monster->health = 1000;
+			new_monster->mana = 200;
+			new_monster->exp = 300;
+			new_monster->dead = false;
+			new_monster->status = NO_STATUS;
+			new_monster->status_timer = 0;
+			new_monster->resistance = FIRE;
+			new_monster->weakness = ICE;
+	}else if(boss == 1){
+			strcpy(new_monster->name, "demon");
+			new_monster->num_of_attacks = 2;
+			Attack attack1;
+			strcpy(attack1.name, "Fireball");
+			attack1.damage = 30;
+			attack1.mana_cost = 30;
+			attack1.attack_element = FIRE;
+			attack1.accuracy = 80;
+			attack1.status = BURNING;
+			attack1.status_chance = 100;
+			Attack attack2;
+			strcpy(attack2.name, "Smash");
+			attack2.damage = 30;
+			attack2.mana_cost = 0;
+			attack2.attack_element = NONE;
+			attack2.accuracy = 90;
+			attack2.status = NO_STATUS;
+			attack2.status_chance;
+			new_monster->attacks[0] = attack1;
+			new_monster->attacks[1] = attack2;
+			new_monster->ch = '*';
+			new_monster->max_health = 800;
+			new_monster->health = 800;
+			new_monster->mana = 400;
+			new_monster->exp = 300;
+			new_monster->dead = false;
+			new_monster->status = NO_STATUS;
+			new_monster->status_timer = 0;
+			new_monster->resistance = DRAIN;
+			new_monster->weakness = NONE;
+	}else if(boss == 2){
+			strcpy(new_monster->name, "lich king");
+			new_monster->num_of_attacks = 2;
+			Attack attack1;
+			strcpy(attack1.name, "Rot");
+			attack1.damage = 20;
+			attack1.mana_cost = 20;
+			attack1.attack_element = NONE;
+			attack1.accuracy = 100;
+			attack1.status = POISONED;
+			attack1.status_chance = 100;
+			Attack attack2;
+			strcpy(attack2.name, "Bone Spear");
+			attack2.damage = 25;
+			attack2.mana_cost = 0;
+			attack2.attack_element = NONE;
+			attack2.accuracy = 90;
+			attack2.status = BLEEDING;
+			attack2.status_chance = 30;
+			new_monster->attacks[0] = attack1;
+			new_monster->attacks[1] = attack2;
+			new_monster->ch = '*';
+			new_monster->max_health = 800;
+			new_monster->health = 800;
+			new_monster->mana = 1000;
+			new_monster->exp = 300;
+			new_monster->dead = false;
+			new_monster->status = NO_STATUS;
+			new_monster->status_timer = 0;
+			new_monster->resistance = ICE;
+			new_monster->weakness = HOLY;
+	}
+	return *new_monster;
+}
+
+void bossBeaten(){
+	map[14][50].ch = '.';
+	map[14][50].walkable = true;
+	map[14][50].transparent = true;
 }
 
 Monster selectMonster(int y, int x){
@@ -946,16 +1052,97 @@ void moveMonsters(){
 			}
 }
 
+void generateBossFloor(){
+	Tile** tiles = calloc(MAP_HEIGHT, sizeof(Tile*));
+
+	for (int y = 0; y<MAP_HEIGHT; y++){
+		tiles[y] = calloc(MAP_WIDTH, sizeof(Tile));
+		for (int x=0; x < MAP_WIDTH; x++){
+			tiles[y][x].ch = '#';
+			tiles[y][x].color = COLOR_PAIR(VISIBLE_COLOR);
+			tiles[y][x].walkable=false;
+			tiles[y][x].transparent = false;
+			tiles[y][x].visible = false;
+			tiles[y][x].seen = false;
+			tiles[y][x].has_transition = false;
+		}
+	}
+	map = tiles;
+	srand(time(NULL));
+	int height, width, n_rooms;
+	n_rooms = 3;
+	Room *rooms = calloc(n_rooms, sizeof(Room));
+	rooms[0] = createRoom(30, 48, 5, 5);
+	rooms[1] = createRoom(15, 46, 9, 9);
+	rooms[2] = createRoom(5, 49, 3, 3);
+	for(int i = 0; i < n_rooms; i++){
+		for(int y = rooms[i].pos.y; y < rooms[i].pos.y + rooms[i].height; y++){
+			for(int x = rooms[i].pos.x; x < rooms[i].pos.x + rooms[i].width; x++){
+				map[y][x].ch = '.';
+				map[y][x].has_monster = false;
+				map[y][x].has_item = false;
+				map[y][x].has_transition = false;
+				map[y][x].walkable = true;
+				map[y][x].transparent = true;
+			}
+		}
+	}
+	map[32][48].ch = 'i';
+	map[32][48].has_item = true;
+	map[32][48].item = generateItem();
+	map[32][52].ch = 'i';
+	map[32][52].has_item = true;
+	map[32][52].item = generateItem();
+	map[34][50].ch = 'i';
+	map[34][50].has_item = true;
+	map[34][50].item = generateItem();
+
+	Monster new_enemy = selectBoss(0, 0);
+	int y = 19;
+	int x = 50;
+	new_enemy.pos.y = 19;
+	new_enemy.pos.x = 50;
+	new_enemy.wait_time = 0;
+	map[y][x].monster = &new_enemy;
+	map[y][x].has_monster = true;
+	map[y][x].ch = '.';
+	monsters[monster_index] = new_enemy;
+	monster_index++;
+
+	for(int i = 0; i < n_rooms; i++){
+		if(i > 0){
+			connectRooms(rooms[i-1].center, rooms[i].center);
+		}
+	}
+	map[rooms[n_rooms-1].center.y][rooms[n_rooms-1].center.x].has_transition = true;
+	map[rooms[n_rooms-1].center.y][rooms[n_rooms-1].center.x].ch = 'v';
+	map[rooms[n_rooms-1].center.y][rooms[n_rooms-1].center.x].walkable = true;
+
+	map[14][50].ch = '#';
+	map[14][50].walkable = false;
+	map[14][50].transparent = false;
+}
+
 Position generateMap(){
 	current_player->floor++;
-	monster_index = 0;
-	doorway = 1;
-	Position pos;
-	map = createMapTiles();
-	pos = setupRooms();
-	moveMonsters();
-	drawMap();
-	return pos;
+	if(current_player->floor%100 == 0){
+		monster_index = 0;
+		Position pos;
+		pos.x = 50;
+		pos.y = 32;
+		generateBossFloor();
+		drawMap();
+		return pos;
+	}else{
+		monster_index = 0;
+		doorway = 1;
+		Position pos;
+		map = createMapTiles();
+		pos = setupRooms();
+		moveMonsters();
+		drawMap();
+		return pos;
+	}
 }
 
 void regenerateMap(bool has_moved){

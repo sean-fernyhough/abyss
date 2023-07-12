@@ -71,6 +71,9 @@ void battleLoop(Monster * a, Player * b){
 				}
 				clear();
 				is_battling = false;
+				if(current_player->floor%100 == 0){
+					bossBeaten();
+				}
 				return;
 			}else{
 				if(monster->status == BURNING || monster->status == BLEEDING || monster->status == POISONED){
@@ -367,6 +370,9 @@ void attack(){
 				reward_exp = 0;
 			}
 		}
+		if(current_player->floor%100 == 0){
+			bossBeaten();
+		}
 		clear();
 		is_battling = false;
 	}else{
@@ -576,6 +582,9 @@ void cast(Spell spell){
 		}
 		clear();
 		is_battling = false;
+		if(current_player->floor%100 == 0){
+			bossBeaten();
+		}
 	}
 	}else{
 		battleMessage("You don't have enough mana!");
