@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "ui.h"
 #include <math.h>
+#include <stdbool.h>
 
 int skill_points = 3;
 Stats *stats;
@@ -803,6 +804,7 @@ void inventorySelect(int sub_section, int index){
 			}
 			break;
 		case 2:
+			{
 			bool item_swapped = false;
 			bool item_2_swapped = false;
 			Item temp_item;
@@ -962,6 +964,7 @@ void inventorySelect(int sub_section, int index){
 				}else{
 					switch(current_player->inventory[index].consumable.type){
 						case HEALTH_POTION:
+							{
 							int health1 = current_player->health;
 							current_player->health += current_player->inventory[index].consumable.tier*10;
 							if(current_player->health > current_player->max_health){
@@ -971,7 +974,9 @@ void inventorySelect(int sub_section, int index){
 							sprintf(action_message, "%d health restored!", health2 - health1);
 							action_taken = true;
 							break;
+							}
 						case MANA_POTION:
+							{
 							int mana1 = current_player->mana;
 							current_player->mana += current_player->inventory[index].consumable.tier*10;
 							if(current_player->mana > current_player->max_mana){
@@ -981,6 +986,7 @@ void inventorySelect(int sub_section, int index){
 							sprintf(action_message, "%d mana restored!", mana2 - mana1);
 							action_taken = true;
 							break;
+							}
 						case SCROLL:
 							if(current_player->inventory[index].consumable.scroll_spell.type == HEALING){
 							int health1 = current_player->health;
@@ -1016,6 +1022,7 @@ void inventorySelect(int sub_section, int index){
 				}
 			}
 			break;
+			}
 		case 3:
 			if(!is_battling){
 				if(current_player->spellbook[index].type == HEALING){
