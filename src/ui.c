@@ -22,6 +22,7 @@ bool manual_attack = false;
 bool focused = false;
 
 int num_of_items = 0;
+int num_of_spells = 0;
 
 void drawMenu(int selected){
 	clear();
@@ -271,14 +272,39 @@ void characterConfirmation(){
 	free(stats);
 }
 
+void inventorySort(){
+	for(int i = 0; i < num_of_items; i++){
+		for(int j = 0; j < num_of_items; j++){
+			if(j < num_of_items - 1){
+				if(current_player->inventory[j].name[0] > current_player->inventory[j+1].name[0]){
+					Item temp_item = current_player->inventory[j+1];
+					current_player->inventory[j+1] = current_player->inventory[j];
+					current_player->inventory[j] = temp_item;
+				}
+			}
+		}
+	}
+	for(int i = 0; i < num_of_spells; i++){
+		for(int j = 0; j < num_of_spells; j++){
+			if(j < num_of_spells - 1){
+				if(current_player->spellbook[j].name[0] > current_player->spellbook[j+1].name[0]){
+					Spell temp_spell = current_player->spellbook[j+1];
+					current_player->spellbook[j+1] = current_player->spellbook[j];
+					current_player->spellbook[j] = temp_spell;
+				}
+			}
+		}
+	}
+}
+
 void drawInventory(){
 	in_inventory = true;
 	int ich;
-	int num_of_spells = 0;
 	int sub_section = 2;
 	int index = 0;
 	int protectionFactor = 0;
 	while(in_inventory){
+		inventorySort();
 		protectionFactor = 0;
 		protectionFactor += current_player->head.name[0] != '\0'?current_player->head.armor.protection:0;
 		protectionFactor += current_player->body.name[0] != '\0'?current_player->body.armor.protection:0;
@@ -501,7 +527,7 @@ void drawInventory(){
 				move(43, 2);
 				if(current_player->inventory[index].name[0] != '\0'){
 					if(current_player->inventory[index].type == WEAPON && current_player->inventory[index].weapon.type != SHIELD){
-						printw("%s DMG: %d -- E) Equip Main Hand %sX) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player), current_player->inventory[index].weapon.is_two_handed?"":"R) Equip Off Hand ");
+						printw("%s DMG: %d -- E) Equip Main Hand %sX) Drop", current_player->inventory[index].description, getDamage(&current_player->inventory[index].weapon, current_player), current_player->inventory[index].weapon.is_two_handed?"":current_player->main_hand.name[0]!='\0'&& !(current_player->main_hand.weapon.is_two_handed)?"R) Equip Off Hand ":"");
 					}else if(current_player->inventory[index].type == CONSUMABLE){
 						if(current_player->inventory[index].consumable.type == SCROLL){
 							if(current_player->inventory[index].consumable.scroll_spell.type == HEALING){
@@ -589,7 +615,7 @@ void drawInventory(){
 				inventorySelect(sub_section, index);
 				break;
 			case 'r':
-				if(sub_section == 2 && current_player->inventory[index].type == WEAPON){
+				if(sub_section == 2 && current_player->inventory[index].type == WEAPON && current_player->main_hand.name[0]!='\0' && !(current_player->main_hand.weapon.is_two_handed)){
 					if(current_player->inventory[index].weapon.type != SHIELD && !(current_player->inventory[index].weapon.is_two_handed)){
 						equipOffHand(index);
 					}
@@ -651,39 +677,25 @@ void equipOffHand(int index){
 		blank_item.weapon.damage = 0;
 		blank_item.armor.protection = 0;
 		blank_item.weapon.count = 0;
-		if(current_player->main_hand.name[0] != '\0' && current_player->main_hand.weapon.is_two_handed){
-			if(current_player->main_hand.name[0] != '\0'){
-				temp_item = current_player->main_hand;
-				item_swapped = true;
-			}
-			current_player->main_hand = current_player->inventory[index];
-			if(current_player->off_hand.name[0] != '\0'){
-				temp_item_2 = current_player->off_hand;
-				item_2_swapped = true;
-			}
-		}else{
-			if(current_player->off_hand.name[0] != '\0'){
-				temp_item = current_player->off_hand;
-				item_swapped = true;
-			}
-			current_player->off_hand = current_player->inventory[index];
+		blank_item.weapon.is_two_handed = false;
+		if(current_player->off_hand.name[0] != '\0'){
+			temp_item = current_player->off_hand;
+			item_swapped = true;
 		}
-				//current_player->main_hand.weapon.is_equipped = true;
-		if(!item_swapped && !item_2_swapped){
-			for(int i = index; i < num_of_items; i++){
-				if(i == 17){
-					current_player->inventory[i].name[0] = '\0';
-				}else{
-					current_player->inventory[i] = current_player->inventory[i+1];
-				}
+		current_player->off_hand = current_player->inventory[index];
+		current_player->inventory[index] = blank_item;
+		num_of_items--;
+		for(int i = index; i < num_of_items; i++){
+			if(i == 17){
+				current_player->inventory[i].name[0] = '\0';
+			}else{
+				current_player->inventory[i] = current_player->inventory[i+1];
+				current_player->inventory[i+1] = blank_item;
 			}
-		}else{
-			if(item_swapped){
-				current_player->inventory[index] = temp_item;
-			}
-			if(item_2_swapped){
-				current_player->inventory[index+1] = temp_item_2;
-			}
+		}
+		if(item_swapped){
+			num_of_items++;
+			current_player->inventory[num_of_items-1] = temp_item;
 		}
 }
 
@@ -695,6 +707,7 @@ void inventorySelect(int sub_section, int index){
 	blank_item.weapon.damage = 0;
 	blank_item.armor.protection = 0;
 	blank_item.weapon.count = 0;
+	blank_item.weapon.is_two_handed = false;
 	switch(sub_section){
 		case 0:
 			if(current_player->skill_points > 0){
@@ -803,15 +816,11 @@ void inventorySelect(int sub_section, int index){
 					current_player->arrows.weapon.is_equipped = false;
 					current_player->arrows = current_player->inventory[index];
 				}else if(current_player->inventory[index].weapon.type == SHIELD){
-					if(current_player->off_hand.name[0] != '\0'){
-						temp_item = current_player->off_hand;
-						item_swapped = true;
-					}
-					current_player->off_hand.weapon.is_equipped = false;
-					current_player->off_hand = current_player->inventory[index];
+					equipOffHand(index);
+					return;
 				}else{
 					if(current_player->inventory[index].weapon.is_two_handed){
-						if(num_of_items > 15){
+						if(num_of_items > 15 && current_player->off_hand.name[0]!='\0'){
 							move(43, 2);
 							printw("There is not enough room in your inventory!");
 						}else{
@@ -820,6 +829,8 @@ void inventorySelect(int sub_section, int index){
 								item_swapped = true;
 							}
 							current_player->main_hand = current_player->inventory[index];
+							current_player->inventory[index] = blank_item;
+							num_of_items--;
 							if(current_player->off_hand.name[0] != '\0'){
 								temp_item_2 = current_player->off_hand;
 								item_2_swapped = true;
@@ -832,23 +843,24 @@ void inventorySelect(int sub_section, int index){
 							item_swapped = true;
 						}
 						current_player->main_hand = current_player->inventory[index];
+						current_player->inventory[index] = blank_item;
+						num_of_items--;
 					}
-						//current_player->main_hand.weapon.is_equipped = true;
-					if(!item_swapped && !item_2_swapped){
-						for(int i = index; i < num_of_items; i++){
-							if(i == 17){
-								current_player->inventory[i].name[0] = '\0';
-							}else{
-								current_player->inventory[i] = current_player->inventory[i+1];
-							}
+					for(int i = index; i < num_of_items; i++){
+						if(i == 17){
+							current_player->inventory[i].name[0] = '\0';
+						}else{
+							current_player->inventory[i] = current_player->inventory[i+1];
+							current_player->inventory[i+1] = blank_item;
 						}
-					}else{
-						if(item_swapped){
-							current_player->inventory[index] = temp_item;
-						}
-						if(item_2_swapped){
-							current_player->inventory[index+1] = temp_item_2;
-						}
+					}
+					if(item_swapped){
+						num_of_items++;
+						current_player->inventory[num_of_items-1] = temp_item;
+					}
+					if(item_2_swapped){
+						num_of_items++;
+						current_player->inventory[num_of_items-1] = temp_item_2;
 					}
 				}
 			}else if(current_player->inventory[index].type == ARMOR){
@@ -860,7 +872,6 @@ void inventorySelect(int sub_section, int index){
 						}
 						current_player->head.armor.is_equipped = false;
 						current_player->head = current_player->inventory[index];
-						//current_player->head.armor.is_equipped = true;
 						break;
 					case BODY:
 						if(current_player->body.name[0] != '\0'){
@@ -899,16 +910,19 @@ void inventorySelect(int sub_section, int index){
 						//current_player->feet.armor.is_equipped = true;
 						break;
 				}
-				if(item_swapped){
-					current_player->inventory[index] = temp_item;
-				}else{
-					for(int i = index; i < num_of_items; i++){
-						if(i == 17){
-							current_player->inventory[i].name[0] = '\0';
-						}else{
-							current_player->inventory[i] = current_player->inventory[i+1];
-						}
+				current_player->inventory[index] = blank_item;
+				num_of_items--;
+				for(int i = index; i < num_of_items; i++){
+					if(i == 17){
+						current_player->inventory[i].name[0] = '\0';
+					}else{
+						current_player->inventory[i] = current_player->inventory[i+1];
+						current_player->inventory[i+1] = blank_item;
 					}
+				}
+				if(item_swapped){
+					num_of_items++;
+					current_player->inventory[num_of_items-1] = temp_item;
 				}
 			}else if(current_player->inventory[index].type == CONSUMABLE){
 				if(is_battling){

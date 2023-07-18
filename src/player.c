@@ -26,6 +26,7 @@ Player *createPlayer(char name[], Stats *stats){
 	blank_item.weapon.damage = 0;
 	blank_item.armor.protection = 0;
 	blank_item.weapon.count = 0;
+	blank_item.weapon.is_two_handed = false;
 
 
 	player->main_hand = blank_item;

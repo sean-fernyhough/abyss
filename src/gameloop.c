@@ -161,6 +161,7 @@ void pickupItem(Item * item, int y, int x){
 			getch();
 		}
 	}
+	inventorySort();
 }
 
 
