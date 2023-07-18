@@ -971,12 +971,14 @@ Item * generateConsumable(){
 	}
 	switch(new_item->consumable.type){
 		case SCROLL:
-			Spell scroll_spell = generateSpell()->spell;
-			sprintf(new_item->name, "Scroll of %s", scroll_spell.name);
-			strcpy(new_item->description, scroll_spell.description);
-			new_item->consumable.scroll_spell = scroll_spell;
-			new_item->consumable.scroll_spell.mana_cost = 0;
-			break;
+			{
+				Spell scroll_spell = generateSpell()->spell;
+				sprintf(new_item->name, "Scroll of %s", scroll_spell.name);
+				strcpy(new_item->description, scroll_spell.description);
+				new_item->consumable.scroll_spell = scroll_spell;
+				new_item->consumable.scroll_spell.mana_cost = 0;
+				break;
+			}
 		case HEALTH_POTION:
 			sprintf(new_item->name, "Potion of health");
 			sprintf(new_item->description, "A potion that restores %d health", tier*10);
