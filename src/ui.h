@@ -9,6 +9,7 @@ void handleMenuInput(char ch);
 void drawStats();
 void drawEnemy(char name[]);
 void drawBattle();
+void inventorySort(void);
 void drawInventory();
 void drawSpellbook(int selected);
 void drawDeath();
