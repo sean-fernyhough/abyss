@@ -678,41 +678,24 @@ void equipOffHand(int index){
 		blank_item.armor.protection = 0;
 		blank_item.weapon.count = 0;
 		blank_item.weapon.is_two_handed = false;
-		if(current_player->main_hand.name[0] != '\0' && current_player->main_hand.weapon.is_two_handed){
-			if(current_player->main_hand.name[0] != '\0'){
-				temp_item = current_player->main_hand;
-				item_swapped = true;
-				current_player->main_hand = blank_item;
-			}
-			current_player->off_hand = current_player->inventory[index];
-//			if(current_player->off_hand.name[0] != '\0'){
-//				temp_item_2 = current_player->off_hand;
-//				item_2_swapped = true;
-//				current_player->off_hand = blank_item;
-//			}
-		}else{
-			if(current_player->off_hand.name[0] != '\0'){
-				temp_item = current_player->off_hand;
-				item_swapped = true;
-			}
-			current_player->off_hand = current_player->inventory[index];
+		if(current_player->off_hand.name[0] != '\0'){
+			temp_item = current_player->off_hand;
+			item_swapped = true;
 		}
-				//current_player->main_hand.weapon.is_equipped = true;
-		if(!item_swapped && !item_2_swapped){
-			for(int i = index; i < num_of_items; i++){
-				if(i == 17){
-					current_player->inventory[i].name[0] = '\0';
-				}else{
-					current_player->inventory[i] = current_player->inventory[i+1];
-				}
+		current_player->off_hand = current_player->inventory[index];
+		current_player->inventory[index] = blank_item;
+		num_of_items--;
+		for(int i = index; i < num_of_items; i++){
+			if(i == 17){
+				current_player->inventory[i].name[0] = '\0';
+			}else{
+				current_player->inventory[i] = current_player->inventory[i+1];
+				current_player->inventory[i+1] = blank_item;
 			}
-		}else{
-			if(item_swapped){
-				current_player->inventory[index] = temp_item;
-			}
-			if(item_2_swapped){
-				current_player->inventory[index+1] = temp_item_2;
-			}
+		}
+		if(item_swapped){
+			num_of_items++;
+			current_player->inventory[num_of_items-1] = temp_item;
 		}
 }
 
