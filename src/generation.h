@@ -46,11 +46,10 @@ Monster selectBoss();
 void generateBossFloor();
 void bossBeaten();
 void moveMonsters();
-void connectRooms();
+void connectRooms(Position roomOneCenter, Position roomTwoCenter);
 void addMonsters();
 Tile** createMapTiles();
 extern Tile**map;
-
 Monster selectMonster(int x, int y);
 Item * generateItem();
 

@@ -13,7 +13,7 @@ void inventorySort(void);
 void drawInventory();
 void drawSpellbook(int selected);
 void drawDeath();
-void drawCharacterMenu();
+void drawCharacterMenu(int characer_option);
 void addSkillPoint(int skill);
 void removeSkillPoint(int skill);
 void nameFocus();

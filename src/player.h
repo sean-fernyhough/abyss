@@ -6,7 +6,7 @@
 #include <string.h>
 
 
-Player *createPlayer();
+Player *createPlayer(char name[], Stats * stats);
 int getDamage(Weapon * weapon, Player * player);
 int getSpellDamage(Spell * spell, Player * player);
 

@@ -1099,7 +1099,7 @@ void generateBossFloor(){
 	map[34][50].has_item = true;
 	map[34][50].item = generateItem();
 
-	Monster new_enemy = selectBoss(0, 0);
+	Monster new_enemy = selectBoss();
 	int y = 19;
 	int x = 50;
 	new_enemy.pos.y = 19;
