@@ -239,7 +239,7 @@ void battleMenuSelect(){
 			displaySpells();
 			break;
 		case 2:
-			drawInventory(true);
+			drawInventory();
 			break;
 		case 3:
 			flee();
